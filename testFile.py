@@ -268,7 +268,7 @@ def update_registration():
 
     # Find if the id exist in the event table
     cursor = conn.cursor(dictionary=True) 
-    query = "SELECT * FROM event WHERE id = %s" 
+    query = "SELECT * FROM registration WHERE id = %s" 
     cursor.execute(query, (registrationid,))                                                  
     registration = cursor.fetchone()   
 
@@ -280,7 +280,7 @@ def update_registration():
     # Only the variables added to the postman input will be updated, the rest will stay the same on MySQL
     # However, ID must be entered
     memberid = request_data.get('event_id', registration['event_id'])
-     eventid= request_data.get('member_id', registration['event_id'])
+    eventid= request_data.get('member_id', registration['event_id'])
 
     query = "UPDATE registration SET event_id = %s, member_id = %s WHERE id = %s"
     cursor.execute(query, (memberid, eventid))
