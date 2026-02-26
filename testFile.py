@@ -283,7 +283,7 @@ def update_registration():
     eventid= request_data.get('member_id', registration['member_id'])
 
     query = "UPDATE registration SET event_id = %s, member_id = %s WHERE id = %s"
-    cursor.execute(query, (memberid, eventid))
+    cursor.execute(query, (eventid, memberid, registrationid))
     conn.commit()
                                                                                                                                    
     return 'SUCCESS'
