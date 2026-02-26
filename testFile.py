@@ -259,4 +259,33 @@ def delete_registration():
                                                                                                                                    
     return 'SUCCESS'
 
+## UPDATE a event ##
+@app.route('/api/updateregistration', methods=['PUT'])           # Test this address http://127.0.0.1:5000/api/updateregistration 
+def update_registration():
+
+    request_data = request.get_json()                
+    registrationid = request_data['id']       
+
+    # Find if the id exist in the event table
+    cursor = conn.cursor(dictionary=True) 
+    query = "SELECT * FROM registration WHERE id = %s" 
+    cursor.execute(query, (registrationid,))                                                  
+    registration = cursor.fetchone()   
+
+    # If event list return empty, no member was found with the ID provided
+    if not registration:
+        statement = f'Registration {registrationid} does not exist, please review'
+        return jsonify(statement)
+
+    # Only the variables added to the postman input will be updated, the rest will stay the same on MySQL
+    # However, ID must be entered
+    memberid = request_data.get('event_id', registration['event_id'])
+    eventid= request_data.get('member_id', registration['member_id'])
+
+    query = "UPDATE registration SET event_id = %s, member_id = %s WHERE id = %s"
+    cursor.execute(query, (eventid, memberid, registrationid))
+    conn.commit()
+                                                                                                                                   
+    return 'SUCCESS'
+
 app.run() 
