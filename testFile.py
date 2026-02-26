@@ -7,6 +7,7 @@ from sql import execute_query
 from sql import execute_read_query
 from flask import jsonify
 from flask import request
+from werkzeug.security import generate_password_hash
 
 ## create a connection to mysql ##
 
@@ -75,7 +76,7 @@ def update_member():
 @app.route('/api/members', methods=['GET'])                   # Test this address http://127.0.0.1:5000/api/members
 def show_members():
 
-    query = "SELECT * FROM member"                              
+    query = "SELECT id, firstname, lastname, details, title, level FROM member"                              
     membertable = execute_read_query(conn, query)
 
     return jsonify(membertable)
