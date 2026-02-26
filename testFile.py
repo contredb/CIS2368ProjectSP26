@@ -34,9 +34,10 @@ def add_member():
     newtitle = request_data['title']
     newlevel = request_data['level']
     newpassword = request_data['password']
-    
-    query = "INSERT INTO member(firstname,lastname,details,title,level) VALUES (%s,%s,%s,%s,%s.%s)" 
-    cursor.execute(query, (newfistname, newlastname,newdetail,newtitle,newlevel,newpassword))
+    #scramble pw
+    hashedpassword = generate_password_hash(newpassword)
+    query = "INSERT INTO member(firstname,lastname,details,title,level, password) VALUES (%s,%s,%s,%s,%s,%s)" 
+    cursor.execute(query, (newfistname, newlastname,newdetail,newtitle,newlevel,hashedpassword))
     conn.commit()  
 
     return 'SUCCESS'
@@ -66,10 +67,14 @@ def update_member():
     details = request_data.get('details', member['details'])
     title = request_data.get('title', member['title'])
     level = request_data.get('level', member['level'])
-    password = request_data.get('password', member['password'])
+    
+    if 'password' in request_data:
+        password_to_update = generate_password_hash(request_data['password'])
+    else:
+        password_to_update = member['password']
 
     query = "UPDATE member SET firstname = %s, lastname = %s, details = %s, title = %s, level = %s, password = %s WHERE id = %s"
-    cursor.execute(query, (firstname, lastname, details, title, level, password, memberid))
+    cursor.execute(query, (firstname, lastname, details, title, level, password_to_update, memberid))
     conn.commit()
                                                                                                                                    
     return 'SUCCESS'
