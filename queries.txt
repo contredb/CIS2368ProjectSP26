@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS member (
     lastname VARCHAR(50) NOT NULL,
     details VARCHAR(255),
     title VARCHAR(255),
+    password VARCHAR(255) NOT NULL,  
     level VARCHAR(50) NOT NULL, (WILL CHANGE)
     PRIMARY KEY (id)
 );
