@@ -34,7 +34,7 @@ def add_member():
     newlevel = request_data['level']
     newpassword = request_data['password']
     
-    query = "INSERT INTO member(firstname,lastname,details,title,level) VALUES (%s,%s,%s,%s,%s.%s)" 
+    query = "INSERT INTO member(firstname,lastname,details,title,level,password) VALUES (%s,%s,%s,%s,%s.%s)" 
     cursor.execute(query, (newfistname, newlastname,newdetail,newtitle,newlevel,newpassword))
     conn.commit()  
 
