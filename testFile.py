@@ -68,6 +68,7 @@ def update_member():
     title = request_data.get('title', member['title'])
     level = request_data.get('level', member['level'])
     
+    #check if new password is provided, if not use the existing password
     if 'password' in request_data:
         password_to_update = generate_password_hash(request_data['password'])
     else:
