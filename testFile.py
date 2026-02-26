@@ -235,4 +235,28 @@ def show_registrations():
 
     return jsonify(registrationtable)
 
+## DELETE a registration ##
+@app.route('/api/deleteregistration', methods=['DELETE'])           # Test this address http://127.0.0.1:5000/api/deleteregistration 
+def delete_registration():
+
+    request_data = request.get_json()                
+    registrationid = request_data['id']       
+
+    # Find if the id exist in the event table
+    cursor = conn.cursor(dictionary=True) 
+    query = "SELECT * FROM registration WHERE id = %s" 
+    cursor.execute(query, (registrationid,))                                                  
+    registration = cursor.fetchone()   
+
+    # If Event list return empty, no event was found with the ID provided
+    if not registration:
+        statement = f'Registration {registrationid} does not exist, please review'
+        return jsonify(statement)
+
+    query = "DELETE FROM registration WHERE id = %s"
+    cursor.execute(query, (registrationid,))
+    conn.commit()
+                                                                                                                                   
+    return 'SUCCESS'
+
 app.run() 
