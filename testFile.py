@@ -280,7 +280,7 @@ def update_registration():
     # Only the variables added to the postman input will be updated, the rest will stay the same on MySQL
     # However, ID must be entered
     memberid = request_data.get('event_id', registration['event_id'])
-    eventid= request_data.get('member_id', registration['event_id'])
+    eventid= request_data.get('member_id', registration['member_id'])
 
     query = "UPDATE registration SET event_id = %s, member_id = %s WHERE id = %s"
     cursor.execute(query, (memberid, eventid))
