@@ -36,6 +36,7 @@ def add_member():
     newpassword = request_data['password']
     #scramble pw
     hashedpassword = generate_password_hash(newpassword)
+    
     query = "INSERT INTO member(firstname,lastname,details,title,level, password) VALUES (%s,%s,%s,%s,%s,%s)" 
     cursor.execute(query, (newfistname, newlastname,newdetail,newtitle,newlevel,hashedpassword))
     conn.commit()  
