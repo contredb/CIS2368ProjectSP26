@@ -1,13 +1,15 @@
 import mysql.connector
 import flask
 import creds
+import time
+import hashlib
 from mysql.connector import Error
 from sql import create_connection                 
 from sql import execute_query
 from sql import execute_read_query
 from flask import jsonify
 from flask import request
-from werkzeug.security import generate_password_hash
+
 
 ## create a connection to mysql ##
 
@@ -19,6 +21,46 @@ app = flask.Flask(__name__)
 app.config["DEBUG"] = True    
 
 #********* Program will be running on http://127.0.0.1:5000 *********#
+
+#Setting up Security Helper ushing hashlib and time tokens
+def is_token_valid():
+    token = request.headers.get('timetoken')
+
+    if not token:
+        return False
+    try:
+        #check if the token's float value is grater than the time, meaning it is valid in the future
+        if float(token) > time.time():
+            return True
+        return False
+    except ValueError:
+        return False
+
+#Create a login route so that users can receive a token
+@app.route('/api/login', methods=['POST'])  
+def login():
+    request_data = request.get_json()           
+    memberid = request_data['id']
+    password = request_data['password']
+
+    if not memberid or not password:
+        return jsonify({'error': 'Missing credentials'}), 400
+    
+    #hash incoming password using hashlib
+    hashed_password = hashlib.sha256(password.encode()).hexdigest()
+    cursor = conn.cursor(dictionary=True)
+    query = "SELECT * FROM member WHERE id = %s"
+    cursor.execute(query, (memberid,))
+    member = cursor.fetchone()
+
+    #check if member exists and if the hashed password matches the stored password
+    if member and member['password'] == hashed_password:
+        #generate a token that expires in 1 hour or 3600 seconds
+        expiration = time.time() + 3600
+        return jsonify({'message': 'Login successful', 'token': str(expiration)})
+    return jsonify({'error': 'Invalid credentials'}), 401
+
+
 
 ######################################### CRUD MEMBER ######################################################
 
@@ -35,7 +77,7 @@ def add_member():
     newlevel = request_data['level']
     newpassword = request_data['password']
     #scramble pw
-    hashedpassword = generate_password_hash(newpassword)
+    hashedpassword = hashlib.sha256(newpassword.encode()).hexdigest()
     
     query = "INSERT INTO member(firstname,lastname,details,title,level, password) VALUES (%s,%s,%s,%s,%s,%s)" 
     cursor.execute(query, (newfistname, newlastname,newdetail,newtitle,newlevel,hashedpassword))
@@ -71,7 +113,7 @@ def update_member():
     
     #check if new password is provided, if not use the existing password
     if 'password' in request_data:
-        password_to_update = generate_password_hash(request_data['password'])
+        password_to_update = hashlib.sha256(request_data['password']).encode()).hexdigest()
     else:
         password_to_update = member['password']
 
@@ -119,13 +161,18 @@ def delete_member():
 ## CREATE a new event ##
 @app.route('/api/addevent', methods=['POST'])     # Test this address http://127.0.0.1:5000/api/addevent 
 def add_event():
+    #security checkpoint
+    if not is_token_valid():
+        return jsonify({'error': 'Invalid or expired token'}), 401
+    #---------------
+    
     cursor = conn.cursor(dictionary=True) 
 
     request_data = request.get_json()           
     neweventname = request_data['name']     
     neweventcapacity = request_data['capacity']
     neweventlevel = request_data['level']
-    neeventdate = request_data['date']                         # UNIQUE date (SQL) gives a duplica entry error - ASSIGMENT RULE
+    neweventdate = request_data['date']                         # UNIQUE date (SQL) gives a duplica entry error - ASSIGMENT RULE
     
     query = "INSERT INTO event(name,capacity,level,date) VALUES (%s,%s,%s,%s)" 
     cursor.execute(query, (neweventname, neweventcapacity,neweventlevel,neeventdate))
